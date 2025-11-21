@@ -44,6 +44,10 @@ def main(champion: str | None = None, stats: bool = False, abilities: bool = Fal
 
     start_time = time.time()
     directory = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+    if not os.path.exists(os.path.join(directory, "srv")):
+        os.mkdir(os.path.join(directory, "srv"))
+
+    directory = os.path.join(directory, "srv")
     if not os.path.exists(os.path.join(directory, "champions")):
         os.mkdir(os.path.join(directory, "champions"))
 
