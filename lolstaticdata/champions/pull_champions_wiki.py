@@ -732,11 +732,12 @@ class LolWikiDataHandler:
             except Exception as error:
                 print(f"ERROR: FAILURE TO PARSE MODIFIER:  {lvling}")
                 print("ERROR:", error)
-                modifier = Modifier(
-                    values=[0 for _ in range(nvalues)],
-                    units=[lvling for _ in range(nvalues)],
-                )
-                modifiers.append(modifier)
+                if nvalues is not None:
+                    modifier = Modifier(
+                        values=[0 for _ in range(nvalues)],
+                        units=[lvling for _ in range(nvalues)],
+                    )
+                    modifiers.append(modifier)
         return modifiers
 
     def _render_modifier(self, mod: str, nvalues: int) -> Modifier:
