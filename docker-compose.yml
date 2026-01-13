@@ -1,0 +1,21 @@
+services:
+  # Application service to generate static data
+  lol-data-generator:
+    build: .
+    container_name: lol-data-generator
+    volumes:
+      # Named volume to share generated files with other containers
+      - lol-static-data:/app/srv
+      # Mount cache directory to avoid re-downloading
+      - ./__cache__:/app/__cache__
+    environment:
+      - PYTHONUNBUFFERED=1
+    # This service will run once and exit
+    # To regenerate data, run: docker-compose up lol-data-generator
+    restart: "no"
+
+volumes:
+  # Named volume that can be accessed by other Docker containers
+  # Other containers can mount this volume to access the generated JSON files
+  lol-static-data:
+    driver: local

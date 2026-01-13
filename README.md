@@ -18,7 +18,57 @@ Note that it is impossible to represent the enormous complexity of League of Leg
 
 ## Running the Code
 
+### Using Docker (Recommended)
+
+Generate the static data files in a Docker volume that can be accessed by other containers:
+
+```bash
+# Build and generate the data
+docker-compose up
+
+# The generated files are stored in the 'lol-static-data' Docker volume
 ```
+
+**Using the Volume in Other Containers:**
+
+The generated data is stored in a named Docker volume called `lol-static-data`. You can mount this volume in other containers to access the JSON files:
+
+```yaml
+# In another docker-compose.yml
+services:
+  your-app:
+    image: your-image
+    volumes:
+      - lol-static-data:/data/lol:ro  # Mount as read-only
+      
+volumes:
+  lol-static-data:
+    external: true  # Use the volume created by lolstaticdata
+```
+
+**Common Docker Commands:**
+```bash
+# Regenerate the data
+docker-compose up lol-data-generator
+
+# View the logs
+docker-compose logs -f lol-data-generator
+
+# Inspect the volume contents
+docker run --rm -v lol-static-data:/data alpine ls -la /data
+
+# Copy files from volume to host (if needed)
+docker run --rm -v lol-static-data:/data -v $(pwd)/output:/output alpine cp -r /data/. /output
+
+# Remove the volume (warning: deletes all generated data)
+docker-compose down -v
+```
+
+The generated files persist in the Docker volume between container runs.
+
+### Running Locally
+
+```bash
 git clone https://github.com/meraki-analytics/lolstaticdata.git
 cd lolstaticdata
 pip install -r requirements.txt
@@ -28,6 +78,17 @@ python -m lolstaticdata.items
 
 - `--champion NAME` filters the export to a single champion (case-insensitive; optional punctuation/spacing).
 - `--stats`, `--skins`, `--lore`, `--abilities` let you pull only the requested sections. If none are supplied, all sections are generated.
+
+### Serving the Files Locally
+
+After generating the data locally, you can serve the files using Python's built-in HTTP server:
+
+```bash
+cd srv
+python -m http.server 8080
+```
+
+Then access the data at `http://localhost:8080/champions.json`.
 
 ## Contributing
 

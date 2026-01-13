@@ -8,6 +8,10 @@ from collections import OrderedDict
 
 def main():
     directory = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+    if not os.path.exists(os.path.join(directory, "srv")):
+        os.mkdir(os.path.join(directory, "srv"))
+    
+    directory = os.path.join(directory, "srv")
     if not os.path.exists(os.path.join(directory, "items")):
         os.mkdir(os.path.join(directory, "items"))
 
