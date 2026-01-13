@@ -15,7 +15,7 @@ COPY pyproject.toml .
 
 # Copy cron script
 COPY check_updates.sh /app/check_updates.sh
-RUN chmod +x /app/check_updates.sh
+RUN sed -i 's/\r$//' /app/check_updates.sh && chmod +x /app/check_updates.sh
 
 # Create output directory and log file
 RUN mkdir -p /app/srv && touch /var/log/cron.log
@@ -23,8 +23,8 @@ RUN mkdir -p /app/srv && touch /var/log/cron.log
 # Set Python path
 ENV PYTHONPATH=/app
 
-# Add cron job to run every hour
-RUN echo "0 * * * * /app/check_updates.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/update-checker && \
+# Add cron job to run every 10 minutes (for testing)
+RUN echo "*/2 * * * * /app/check_updates.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/update-checker && \
     chmod 0644 /etc/cron.d/update-checker && \
     crontab /etc/cron.d/update-checker
 
@@ -35,7 +35,7 @@ echo "Starting LOL Static Data Generator"\n\
 echo "==========================================="\n\
 echo ""\n\
 echo "Running initial data generation..."\n\
-python -m lolstaticdata.check_and_update\n\
+python3 -m lolstaticdata.check_and_update\n\
 echo ""\n\
 echo "Initial generation complete!"\n\
 echo "Starting cron daemon for hourly updates..."\n\

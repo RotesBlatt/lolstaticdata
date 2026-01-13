@@ -6,7 +6,7 @@ echo "=========================================="
 echo "$(date) - Hourly Update Check"
 echo "=========================================="
 cd /app
-python -m lolstaticdata.check_and_update
+/usr/local/bin/python3 -m lolstaticdata.check_and_update
 echo "$(date) - Check completed"
 echo "=========================================="
 echo ""
