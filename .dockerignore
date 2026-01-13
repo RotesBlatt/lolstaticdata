@@ -23,11 +23,6 @@ ENV/
 .git/
 .gitignore
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
 # Generated data (will be mounted as volume)
 srv/
 
@@ -36,4 +31,8 @@ __cache__/
 
 # Documentation
 README.md
+UPDATES.md
 LICENSE
+
+# Update checker script (copied separately)
+update_checker.py

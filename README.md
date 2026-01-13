@@ -4,6 +4,12 @@ This repository provides code to generate accurate champion and item data. First
 
 If you use this data, please give a shoutout to the League of Legends Wiki and to us (Meraki).
 
+**Features:**
+- Accurate champion and item data from League of Legends Wiki
+- Automatic patch version detection and updates
+- Docker support with hourly update checks
+- Version tracking with timestamps
+
 ## Goals of the Project
 
 Until now, accurate champion data that developers can use to create apps has not been reliably available. Our goal is to provide high quality champion and item data so that you can create awesome applications.
@@ -20,13 +26,28 @@ Note that it is impossible to represent the enormous complexity of League of Leg
 
 ### Using Docker (Recommended)
 
-Generate the static data files in a Docker volume that can be accessed by other containers:
+Generate the static data files in a Docker volume that can be accessed by other containers. The container will automatically check for new patch versions every hour and regenerate the data when a new patch is released:
 
 ```bash
-# Build and generate the data
-docker-compose up
+# Build and start the service (runs in background)
+docker-compose up -d
 
-# The generated files are stored in the 'lol-static-data' Docker volume
+# The container will:
+# 1. Generate initial data on first run
+# 2. Check for new patch versions every hour
+# 3. Automatically regenerate data when a new patch is detected
+# 4. Store version info in srv/version.json
+```
+
+**Version Information:**
+
+The service creates a `version.json` file in the srv directory containing:
+```json
+{
+  "version": "14.23.1",
+  "lastUpdate": "2026-01-13T10:30:00Z",
+  "timestamp": 1736765400
+}
 ```
 
 **Using the Volume in Other Containers:**
@@ -48,11 +69,14 @@ volumes:
 
 **Common Docker Commands:**
 ```bash
-# Regenerate the data
-docker-compose up lol-data-generator
-
-# View the logs
+# View the logs (including update checks)
 docker-compose logs -f lol-data-generator
+
+# Force regeneration immediately
+docker-compose exec lol-data-generator python -m lolstaticdata.check_and_update
+
+# Check current version
+docker-compose exec lol-data-generator cat /app/srv/version.json
 
 # Inspect the volume contents
 docker run --rm -v lol-static-data:/data alpine ls -la /data
@@ -60,11 +84,14 @@ docker run --rm -v lol-static-data:/data alpine ls -la /data
 # Copy files from volume to host (if needed)
 docker run --rm -v lol-static-data:/data -v $(pwd)/output:/output alpine cp -r /data/. /output
 
+# Stop the service
+docker-compose down
+
 # Remove the volume (warning: deletes all generated data)
 docker-compose down -v
 ```
 
-The generated files persist in the Docker volume between container runs.
+The service runs continuously and checks for updates every hour at the top of the hour (e.g., 1:00, 2:00, 3:00).
 
 ### Running Locally
 
@@ -89,6 +116,14 @@ python -m http.server 8080
 ```
 
 Then access the data at `http://localhost:8080/champions.json`.
+
+## Automatic Updates
+
+The application supports automatic version checking and data regeneration when new patches are released. See [UPDATES.md](UPDATES.md) for detailed information on:
+- How automatic updates work
+- Scheduling updates with cron or Task Scheduler
+- Version file format
+- Manual update commands
 
 ## Contributing
 

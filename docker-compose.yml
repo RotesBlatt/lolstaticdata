@@ -1,5 +1,5 @@
 services:
-  # Application service to generate static data
+  # Application service to generate static data and check for updates
   lol-data-generator:
     build: .
     container_name: lol-data-generator
@@ -10,9 +10,8 @@ services:
       - ./__cache__:/app/__cache__
     environment:
       - PYTHONUNBUFFERED=1
-    # This service will run once and exit
-    # To regenerate data, run: docker-compose up lol-data-generator
-    restart: "no"
+    # Keep the service running to check for updates every hour
+    restart: unless-stopped
 
 volumes:
   # Named volume that can be accessed by other Docker containers
