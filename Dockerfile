@@ -23,10 +23,9 @@ RUN mkdir -p /app/srv && touch /var/log/cron.log
 # Set Python path
 ENV PYTHONPATH=/app
 
-# Add cron job to run every 10 minutes (for testing)
-RUN echo "*/2 * * * * /app/check_updates.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/update-checker && \
-    chmod 0644 /etc/cron.d/update-checker && \
-    crontab /etc/cron.d/update-checker
+# Setup cron job to run the update checker every hour
+RUN echo "0 * * * * root /app/check_updates.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/update-checker && \
+    chmod 0644 /etc/cron.d/update-checker
 
 # Create startup script that runs initial generation and starts cron
 RUN echo '#!/bin/sh\n\
