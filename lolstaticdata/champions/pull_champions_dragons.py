@@ -95,8 +95,9 @@ def _try_champion_specific_patterns(champion_key, ability_key, ability_index, fi
     if champion_lower == "hwei":
         # Try different combinations of ability key repetitions
         specific_patterns.extend([
-            f"{champion_lower}{ability_key.lower()}{ability_key.lower()}.png",  # hweiee
-            f"{champion_lower}{ability_key.lower()}{chr(ord('a') + ability_index - 1)}.png",  # hweie + a/b/c
+            f"{champion_lower}{ability_key.lower()}q.png",  
+            f"{champion_lower}{ability_key.lower()}w.png",  
+            f"{champion_lower}{ability_key.lower()}e.png",  
             f"{champion_lower}{ability_key.lower()}{ability_key.lower()}{ability_index}.png",
         ])
     
