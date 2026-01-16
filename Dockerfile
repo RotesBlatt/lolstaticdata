@@ -33,8 +33,12 @@ echo "==========================================="\n\
 echo "Starting LOL Static Data Generator"\n\
 echo "==========================================="\n\
 echo ""\n\
-echo "Running initial data generation..."\n\
-python3 -m lolstaticdata.check_and_update\n\
+echo "Running data generation on startup..."\n\
+echo "Generating champion data..."\n\
+python3 -m lolstaticdata.champions\n\
+echo ""\n\
+echo "Generating item data..."\n\
+python3 -m lolstaticdata.items\n\
 echo ""\n\
 echo "Initial generation complete!"\n\
 echo "Starting cron daemon for hourly updates..."\n\
