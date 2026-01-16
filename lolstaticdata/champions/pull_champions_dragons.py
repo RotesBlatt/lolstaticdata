@@ -94,10 +94,9 @@ def _try_champion_specific_patterns(champion_key, ability_key, ability_index, fi
     # Hwei pattern: "hweiee.png", "hweieq.png", "hweiew.png" (no separators, concatenated)
     if champion_lower == "hwei":
         # Try different combinations of ability key repetitions
+        abilities = ['q', 'w', 'e', 'r']
         specific_patterns.extend([
-            f"{champion_lower}{ability_key.lower()}q.png",  
-            f"{champion_lower}{ability_key.lower()}w.png",  
-            f"{champion_lower}{ability_key.lower()}e.png",  
+            f"{champion_lower}{ability_key.lower()}{abilities[ability_index - 1]}.png",  
             f"{champion_lower}{ability_key.lower()}{ability_key.lower()}{ability_index}.png",
         ])
     
@@ -111,19 +110,13 @@ def _try_champion_specific_patterns(champion_key, ability_key, ability_index, fi
     # Gnar pattern: "gnar_e.png" and "gnarbig_e.png"
     elif champion_lower == "gnar":
         specific_patterns.extend([
-            f"{champion_lower}_{ability_key.lower()}.png",
-            f"{champion_lower}big_{ability_key.lower()}.png",
-            f"{champion_lower}_{ability_key.lower()}{ability_index}.png",
-            f"{champion_lower}big_{ability_key.lower()}{ability_index}.png",
+            f"{champion_lower}{"big_" + ability_key.lower() if ability_index == 2 else "_" + ability_key.lower()}.png",
         ])
     
     # Elise pattern: "elisehumanq" and "elisespiderq"
     elif champion_lower == "elise":
         specific_patterns.extend([
-            f"{champion_lower}human{ability_key.lower()}.png",
-            f"{champion_lower}spider{ability_key.lower()}.png",
-            f"{champion_lower}human{ability_key.lower()}{ability_index}.png",
-            f"{champion_lower}spider{ability_key.lower()}{ability_index}.png",
+            f"{champion_lower}{"human" + ability_key.lower() if ability_index == 1 else "spider" +ability_key.lower()}.png",
         ])
     
     # Aurelion Sol pattern: "aurelionsolr1" and "aurelionsolr2" (R only)
@@ -136,34 +129,26 @@ def _try_champion_specific_patterns(champion_key, ability_key, ability_index, fi
     # Khazix pattern: "khazix_e" and "khazix_e_red"
     elif champion_lower == "khazix":
         specific_patterns.extend([
-            f"{champion_lower}_{ability_key.lower()}.png",
-            f"{champion_lower}_{ability_key.lower()}_red.png",
-            f"{champion_lower}_{ability_key.lower()}{ability_index}.png",
-            f"{champion_lower}_{ability_key.lower()}_red{ability_index}.png",
+            f"{champion_lower}_{ability_key.lower() + "_red" if ability_index == 2 else ability_key.lower()}.png",
         ])
     
     # Rell pattern: "rellw" and "rellmount" (W only)
-    elif champion_lower == "rell" and ability_key.upper() == "W":
+    elif champion_lower == "rell":
         specific_patterns.extend([
-            f"{champion_lower}{ability_key.lower()}.png",
-            f"{champion_lower}mount.png",
-            f"{champion_lower}{ability_key.lower()}{ability_index}.png",
-            f"{champion_lower}mount{ability_index}.png",
+            f"{champion_lower}{"mount" if ability_index == 2 else ability_key.lower()}.png",
         ])
     
     # Riven pattern: "rivenbladeoftheexile" and "rivenwindscar" (R only)
     elif champion_lower == "riven" and ability_key.upper() == "R":
         specific_patterns.extend([
-            f"{champion_lower}bladeoftheexile.png",
-            f"{champion_lower}windscar.png",
+            f"{champion_lower}{"windscar" if ability_index == 2 else "bladeoftheexile"}.png",
         ])
     
     # Tahm Kench pattern: "tahmkenchwrapper" and "tahmkenchr2" (R only)
     elif champion_lower == "tahmkench" and ability_key.upper() == "R":
         specific_patterns.extend([
-            f"{champion_lower}wrapper.png",
+            f"{champion_lower}{"wrapper" if ability_index == 1 else ability_key.lower() + "2"}.png",
             f"{champion_lower}{ability_key.lower()}{ability_index}.png",
-            f"{champion_lower}{ability_key.lower()}2.png",
         ])
     
     # Yorick pattern: "yorick_q" and "yorick_q2" (Q only)
