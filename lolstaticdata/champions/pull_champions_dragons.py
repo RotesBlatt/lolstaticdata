@@ -111,6 +111,7 @@ def _try_champion_specific_patterns(champion_key, ability_key, ability_index, fi
     elif champion_lower == "gnar":
         specific_patterns.extend([
             f"{champion_lower}{"big_" + ability_key.lower() if ability_index == 2 else "_" + ability_key.lower()}.png",
+            f"{champion_lower}{"big_" + ability_key.lower()}.png",
         ])
     
     # Elise pattern: "elisehumanq" and "elisespiderq"
