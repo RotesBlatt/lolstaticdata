@@ -710,31 +710,44 @@ class LolWikiDataHandler:
         initial_split = levelings.split("\n")
         initial_split = [lvling.strip() for lvling in initial_split if lvling.strip()]
         
-        # Remove labels that follow ability rank scaling messages
-        # e.g., "CH-3X Lightning Grenade scales with UPGRADE!!!'s rank" followed by "Magic Damage:"
-        filtered_split = []
-        skip_next = False
-        for i, item in enumerate(initial_split):
-            if skip_next:
-                skip_next = False
-                continue
+        # Handle ability rank scaling messages
+        # Structure: [Scaling message, Label, Values]
+        # We want: [Scaling message, Empty placeholder, Label, Values,]
+        expanded_split = []
+        i = 0
+        while i < len(initial_split):
+            item = initial_split[i]
             
-            filtered_split.append(item)
-            
-            # If this is a scaling message and next item is a label (ends with : and no numbers)
+            # Check if this is a scaling message
             if item in self.ABILITY_RANK_SCALING_MESSAGES:
-                if i + 1 < len(initial_split):
+                # Check if followed by a label and then values
+                if i + 2 < len(initial_split):
                     next_item = initial_split[i + 1]
-                    # Check if next item is just a label (ends with : and has no numbers)
-                    if next_item.endswith(":") and not any(char.isdigit() for char in next_item):
-                        skip_next = True
+                    following_item = initial_split[i + 2]
+                    
+                    # If next is a label (ends with : and no numbers) and following has data
+                    if (next_item.endswith(":") and 
+                        not any(char.isdigit() for char in next_item) and
+                        any(char.isdigit() for char in following_item)):
+                        # Add: scaling message, empty placeholder, label, values
+                        expanded_split.append(item)  # Scaling message
+                        expanded_split.append("")  # Empty placeholder
+                        expanded_split.append(next_item)  # Label
+                        expanded_split.append(following_item)  # Values (skip the label)
+                        i += 3  # Skip all three items we just processed
+                        continue
+            
+            # Normal case - just add the item
+            expanded_split.append(item)
+            i += 1
         
-        initial_split = list(grouper(filtered_split, 2))
+        initial_split = list(grouper(expanded_split, 2))
         for attribute, data in initial_split:
-            # Skip if data is None or empty (malformed Wiki data)
-            if data is None or not data.strip():
+            # Skip if data is None (malformed Wiki data)
+            if data is None:
                 print(f"WARNING: Skipping leveling entry with no data for attribute '{attribute}'")
                 continue
+            # Allow empty strings (placeholders for labels following scaling messages)
             if attribute.endswith(":"):
                 attribute = attribute[:-1]
             result = self._render_leveling(attribute, data, nvalues)
@@ -752,8 +765,12 @@ class LolWikiDataHandler:
 
     def _render_modifiers(self, mods: str, nvalues: int) -> List[Modifier]:
         modifiers = []  # type: List[Modifier]
-        # Handle None or empty modifier data
-        if mods is None or not mods.strip():
+        # Handle None or empty modifier data (empty strings are placeholders)
+        if mods is None:
+            return modifiers
+        
+        # Empty string is a placeholder - return empty modifiers list
+        if not mods.strip():
             return modifiers
         
         try:
