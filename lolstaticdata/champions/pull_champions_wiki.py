@@ -109,6 +109,21 @@ class HTMLAbilityWrapper:
 
 
 class LolWikiDataHandler:
+    # Ability scaling messages that should be kept as attributes
+    # but need the following label (like "Magic Damage:") skipped
+    ABILITY_RANK_SCALING_MESSAGES = {
+        # Nidalee
+        "Takedown scales with Aspect of the Cougar's rank",
+        "Swipe scales with Aspect of the Cougar's rank",
+        "Pounce scales with Aspect of the Cougar's rank",
+        "Cougar form's abilities rank up when Aspect of the Cougar does",
+        # Heimerdinger
+        "CH-3X Lightning Grenade scales with UPGRADE!!!'s rank",
+        "Hextech Rocket Swarm scales with UPGRADE!!!'s rank",
+        "H-28Q Apex Turret scales with UPGRADE!!!'s rank",
+        # Add more ability scaling messages here as needed
+    }
+    
     UNHANDLED_MODIFIERS = {
         # Akshan
         "1 + 0.3 per 100% bonus attack speed": {
@@ -687,20 +702,33 @@ class LolWikiDataHandler:
 
         # Let's parse!
         initial_split = levelings.split("\n")
-        initial_split = [
-            lvling.strip()
-            for lvling in initial_split
-            if lvling.strip()
-            not in (
-                "Takedown scales with Aspect of the Cougar's rank",
-                "Swipe scales with Aspect of the Cougar's rank",
-                "Pounce scales with Aspect of the Cougar's rank",
-                "Cougar form's abilities rank up when Aspect of the Cougar does",
-            )
-        ]
-        initial_split = list(grouper(initial_split, 2))
-
+        initial_split = [lvling.strip() for lvling in initial_split if lvling.strip()]
+        
+        # Remove labels that follow ability rank scaling messages
+        # e.g., "CH-3X Lightning Grenade scales with UPGRADE!!!'s rank" followed by "Magic Damage:"
+        filtered_split = []
+        skip_next = False
+        for i, item in enumerate(initial_split):
+            if skip_next:
+                skip_next = False
+                continue
+            
+            filtered_split.append(item)
+            
+            # If this is a scaling message and next item is a label (ends with : and no numbers)
+            if item in self.ABILITY_RANK_SCALING_MESSAGES:
+                if i + 1 < len(initial_split):
+                    next_item = initial_split[i + 1]
+                    # Check if next item is just a label (ends with : and has no numbers)
+                    if next_item.endswith(":") and not any(char.isdigit() for char in next_item):
+                        skip_next = True
+        
+        initial_split = list(grouper(filtered_split, 2))
         for attribute, data in initial_split:
+            # Skip if data is None or empty (malformed Wiki data)
+            if data is None or not data.strip():
+                print(f"WARNING: Skipping leveling entry with no data for attribute '{attribute}'")
+                continue
             if attribute.endswith(":"):
                 attribute = attribute[:-1]
             result = self._render_leveling(attribute, data, nvalues)
@@ -718,6 +746,10 @@ class LolWikiDataHandler:
 
     def _render_modifiers(self, mods: str, nvalues: int) -> List[Modifier]:
         modifiers = []  # type: List[Modifier]
+        # Handle None or empty modifier data
+        if mods is None or not mods.strip():
+            return modifiers
+        
         try:
             parsed_modifiers = ParsingAndRegex.split_modifiers(mods)
         except Exception as error:
@@ -741,6 +773,10 @@ class LolWikiDataHandler:
         return modifiers
 
     def _render_modifier(self, mod: str, nvalues: int) -> Modifier:
+        # Skip pure labels (text ending with colon and no numbers)
+        if mod.strip().endswith(":") and not ParsingAndRegex.rc_number.findall(mod):
+            raise UnparsableLeveling(f"Skipping label without numeric data: {mod}")
+        
         units, values = ParsingAndRegex.get_modifier(mod, nvalues)
         modifier = Modifier(
             values=values,
