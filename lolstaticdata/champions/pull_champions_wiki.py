@@ -157,8 +157,8 @@ class LolWikiDataHandler:
             "lvling": "Siphoning Strike Stacks"
         },
         # Quinn
-        "8 : 2.93 (based on critical strike chance)": {
-            "value": 8,
+        "7 : 2.56 (based on critical strike chance)": {
+            "value": 7,
             "lvling": " x (0.99 ^ critical strike chance %)"
         },
         # Sett
@@ -182,6 +182,12 @@ class LolWikiDataHandler:
         "[ 1% per 35 ][ 2.86% per 100 ]bonus AD": {
             "value": 2.86,
             "lvling": "% per 100 bonus AD"
+        },
+        #Vladimir
+        "2% / 4% / 6% / 8% (based on charge time)": {
+            "value": 2,
+            "lvling": "% (based on charge time)",
+            "values": [2, 4, 6, 8]
         },
         # Yasuo/Yone
         "4 : 1.33 (based on bonus attack speed)": {
@@ -1114,6 +1120,9 @@ class ParsingAndRegex:
         if mod in list(LolWikiDataHandler.UNHANDLED_MODIFIERS.keys()):
             value = LolWikiDataHandler.UNHANDLED_MODIFIERS[mod]["value"]
             lvling = LolWikiDataHandler.UNHANDLED_MODIFIERS[mod]["lvling"]
+            values = LolWikiDataHandler.UNHANDLED_MODIFIERS[mod]["values"]
+            if values is not None:
+                return [lvling for _ in range(len(values))], values
             parsed = [value for _ in range(nvalues)]
             units = [lvling for _ in range(nvalues)]
             return units, parsed
